@@ -83,7 +83,14 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
       if (!kakao?.maps?.services) { resolve(null); return; }
 
       const ps = new kakao.maps.services.Places();
-      const keyword = school.학교명 + (school.학교명.includes("서울") ? "" : " 서울");
+      // 병설유치원 → 모교 이름으로 검색 (같은 위치)
+      const baseName = school.학교명.endsWith("병설유치원")
+        ? school.학교명.replace("병설유치원", "")
+        : school.학교명;
+      // "서울"이 없으면 구 이름 추가하여 정확도 향상
+      const keyword = baseName.includes("서울")
+        ? baseName
+        : `${school.구} ${baseName}`;
       ps.keywordSearch(keyword, (data: any[], status: string) => {
         if (status === kakao.maps.services.Status.OK && data.length > 0) {
           const result = { lat: parseFloat(data[0].y), lng: parseFloat(data[0].x) };
