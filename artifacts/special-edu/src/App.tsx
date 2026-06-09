@@ -31,9 +31,9 @@ function gradeMatch(학교급: string, key: FilterKey) {
 }
 
 function categoryMatch(school: School, key: FilterKey) {
-  if (key === "특수학교") return school.설치별 === "특수학교";
+  if (key === "특수학교") return school.학교급 === "특수학교";
   if (key === "특수학급 설치교") return school.특수학급수 > 0;
-  if (key === "특수에듀케어 설치교") return school.에듀케어수 > 0;
+  if (key === "특수에듀케어 설치교") return school.학교급 === "유치원" && school.에듀케어수 > 0;
   return false;
 }
 
@@ -44,10 +44,26 @@ function applyFilters(list: School[], activeFilters: Set<FilterKey>): School[] {
   const gradeActive = GRADE_FILTERS.filter(f => activeFilters.has(f));
   const catActive = CATEGORY_FILTERS.filter(f => activeFilters.has(f));
 
+  const 특수학교CatActive = catActive.includes("특수학교");
+  const nonSpecialCatActive = catActive.filter(k => k !== "특수학교");
+
   return list.filter(school => {
+    const isSpecialSchool = school.학교급 === "특수학교";
+
+    // District filter applies to all schools
     if (districtActive.length > 0 && !districtActive.includes(school.구 as FilterKey)) return false;
+
+    if (isSpecialSchool) {
+      // Special schools only appear when "특수학교" category is explicitly selected
+      return 특수학교CatActive;
+    }
+
+    // Regular schools: grade filter
     if (gradeActive.length > 0 && !gradeActive.some(k => gradeMatch(school.학교급, k))) return false;
-    if (catActive.length > 0 && !catActive.some(k => categoryMatch(school, k))) return false;
+
+    // Regular schools: category filter ("특수학교" cat is irrelevant for regular schools)
+    if (nonSpecialCatActive.length > 0 && !nonSpecialCatActive.some(k => categoryMatch(school, k))) return false;
+
     return true;
   });
 }
@@ -60,8 +76,9 @@ function levelBadge(학교급: string) {
     초등학교: "bg-orange-100 text-orange-700",
     중학교: "bg-violet-100 text-violet-700",
     고등학교: "bg-indigo-100 text-indigo-700",
+    특수학교: "bg-purple-100 text-purple-700",
   };
-  const labels: Record<string, string> = { 유치원: "유", 초등학교: "초", 중학교: "중", 고등학교: "고" };
+  const labels: Record<string, string> = { 유치원: "유", 초등학교: "초", 중학교: "중", 고등학교: "고", 특수학교: "특수" };
   return { cls: styles[학교급] ?? "bg-gray-100 text-gray-700", label: labels[학교급] ?? 학교급 };
 }
 

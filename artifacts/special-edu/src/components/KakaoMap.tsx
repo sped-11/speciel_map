@@ -21,6 +21,7 @@ const GWANAK_CENTER = { lat: 37.4784, lng: 126.9516 };
 const BOTH_CENTER = { lat: 37.4953, lng: 126.9455 };
 
 function markerColor(school: School) {
+  if (school.학교급 === "특수학교") return "#7c3aed";
   if (school.잔여 < 0) return "#dc2626";
   if (school.잔여 === 0) return "#f59e0b";
   if (school.잔여 >= 5) return "#16a34a";
@@ -28,7 +29,7 @@ function markerColor(school: School) {
 }
 
 function levelEmoji(학교급: string) {
-  return { 유치원: "🌸", 초등학교: "🏫", 중학교: "📚", 고등학교: "🎓" }[학교급] ?? "🏫";
+  return { 유치원: "🌸", 초등학교: "🏫", 중학교: "📚", 고등학교: "🎓", 특수학교: "⭐" }[학교급] ?? "🏫";
 }
 
 export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiKey }: Props) {
@@ -113,7 +114,7 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
     setGeocoding(true);
     let completed = 0;
 
-    const schoolsToShow = schools.filter(s => s.특수배치 > 0 || s.일반배치 > 0);
+    const schoolsToShow = schools.filter(s => s.특수배치 > 0 || s.일반배치 > 0 || s.학교급 === "특수학교");
 
     if (schoolsToShow.length === 0) {
       setGeocoding(false);
@@ -128,6 +129,15 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
 
       const isSelected = selectedSchool?.id === school.id;
 
+      const isSpecialSchool = school.학교급 === "특수학교";
+      const janyeoText = isSpecialSchool
+        ? ""
+        : school.잔여 > 0
+          ? ` · ${school.잔여}명`
+          : school.잔여 < 0
+            ? " · 초과"
+            : " · 만원";
+
       const content = `
         <div style="
           position:relative;
@@ -137,7 +147,7 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
           cursor:pointer;
         ">
           <div style="
-            background:${isSelected ? '#7c3aed' : color};
+            background:${isSelected ? '#4c1d95' : color};
             color:white;
             font-size:11px;
             font-weight:700;
@@ -149,15 +159,13 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
             line-height:1.4;
           ">
             ${emoji} ${school.약칭}
-            <span style="opacity:0.85;font-weight:500;">
-              ${school.잔여 > 0 ? ' · ' + school.잔여 + '명' : school.잔여 < 0 ? ' · 초과' : ' · 만원'}
-            </span>
+            <span style="opacity:0.85;font-weight:500;">${janyeoText}</span>
           </div>
           <div style="
             width:0;height:0;
             border-left:5px solid transparent;
             border-right:5px solid transparent;
-            border-top:7px solid ${isSelected ? '#7c3aed' : color};
+            border-top:7px solid ${isSelected ? '#4c1d95' : color};
           "></div>
         </div>
       `;
@@ -248,6 +256,7 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
             { color: "#2563eb", label: "1-4명" },
             { color: "#f59e0b", label: "없음(만원)" },
             { color: "#dc2626", label: "초과" },
+            { color: "#7c3aed", label: "특수학교" },
           ].map(item => (
             <div key={item.label} className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: item.color }} />
