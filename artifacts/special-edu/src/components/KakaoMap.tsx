@@ -113,6 +113,7 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
 
     setGeocoding(true);
     let completed = 0;
+    let cancelled = false;
 
     const schoolsToShow = schools.filter(s => s.특수배치 > 0 || s.일반배치 > 0 || s.학교급 === "특수학교");
 
@@ -197,7 +198,9 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
 
     const process = async () => {
       for (const school of schoolsToShow) {
+        if (cancelled) return;
         const coord = await geocodeSchool(school);
+        if (cancelled) return;
         completed++;
         setGeocodeCount(completed);
         if (coord) {
@@ -205,10 +208,14 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
         }
         await new Promise(r => setTimeout(r, 80));
       }
-      setGeocoding(false);
+      if (!cancelled) setGeocoding(false);
     };
 
     process();
+
+    return () => {
+      cancelled = true;
+    };
   }, [schools, apiKey, geocodeSchool, onSelectSchool, selectedSchool]);
 
   if (!apiKey) {
