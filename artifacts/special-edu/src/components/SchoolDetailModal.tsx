@@ -108,7 +108,7 @@ export default function SchoolDetailModal({ school, onClose }: Props) {
               {
                 label: "잔여 자리",
                 value: school.잔여 > 0 ? school.잔여 + "명" : school.잔여 < 0 ? school.잔여 + "명" : "없음",
-                sub: school.잔여 < 0 ? "초과" : school.잔여 === 0 ? "만원" : null,
+                sub: school.잔여 < 0 ? "과밀" : school.잔여 === 0 ? "Full" : null,
               },
             ].map((item) => (
               <div key={item.label} className="flex flex-col items-center py-3 px-2">

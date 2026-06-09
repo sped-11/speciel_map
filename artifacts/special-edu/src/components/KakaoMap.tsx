@@ -132,11 +132,13 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
       const isSpecialSchool = school.학교급 === "특수학교";
       const janyeoText = isSpecialSchool
         ? ""
-        : school.잔여 > 0
-          ? ` · ${school.잔여}명`
-          : school.잔여 < 0
-            ? " · 초과"
-            : " · 만원";
+        : school.특수학급수 === 0
+          ? " · 미설치"
+          : school.잔여 > 0
+            ? ` · ${school.잔여}명`
+            : school.잔여 < 0
+              ? " · 과밀"
+              : " · Full";
 
       const content = `
         <div style="
@@ -254,8 +256,8 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
           {[
             { color: "#16a34a", label: "5명 이상" },
             { color: "#2563eb", label: "1-4명" },
-            { color: "#f59e0b", label: "없음(만원)" },
-            { color: "#dc2626", label: "초과" },
+            { color: "#f59e0b", label: "없음(Full)" },
+            { color: "#dc2626", label: "과밀" },
             { color: "#7c3aed", label: "특수학교" },
           ].map(item => (
             <div key={item.label} className="flex items-center gap-2">

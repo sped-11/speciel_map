@@ -83,8 +83,8 @@ function levelBadge(학교급: string) {
 }
 
 function getJanyeoBadge(잔여: number) {
-  if (잔여 < 0) return { cls: "bg-red-100 text-red-700", label: `${잔여}명(초과)` };
-  if (잔여 === 0) return { cls: "bg-amber-100 text-amber-700", label: "만원" };
+  if (잔여 < 0) return { cls: "bg-red-100 text-red-700", label: `${잔여}명(과밀)` };
+  if (잔여 === 0) return { cls: "bg-amber-100 text-amber-700", label: "Full" };
   if (잔여 >= 5) return { cls: "bg-emerald-100 text-emerald-700", label: `${잔여}명` };
   return { cls: "bg-blue-100 text-blue-700", label: `${잔여}명` };
 }
@@ -272,7 +272,7 @@ export default function App() {
                             </div>
                           </>
                         ) : (
-                          <div className="text-xs text-muted-foreground">일반학급만</div>
+                          <div className="text-xs text-muted-foreground">미설치교</div>
                         )}
                       </div>
                     </div>
