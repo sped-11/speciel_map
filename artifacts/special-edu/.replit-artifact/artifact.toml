@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "2026 특수교육대상자 배치 현황"
+version = "1.0.0"
+id = "artifacts/special-edu"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23747
+
+[services.development]
+run = "pnpm --filter @workspace/special-edu run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/special-edu", "run", "build" ]
+publicDir = "artifacts/special-edu/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23747"
+BASE_PATH = "/"
