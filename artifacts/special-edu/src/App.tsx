@@ -143,6 +143,13 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
       {/* Header */}
+      <div className="bg-red-600 text-white text-center text-xs font-bold py-1.5 tracking-widest flex items-center justify-center gap-4 flex-shrink-0">
+        <span>🔒 외부유출 금지</span>
+        <span className="w-px h-3 bg-white/40" />
+        <span>내부자료</span>
+        <span className="w-px h-3 bg-white/40" />
+        <span>🔒 외부유출 금지</span>
+      </div>
       <header className="bg-[#1B4FA8] text-white px-6 py-4 shadow-lg flex-shrink-0">
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex items-center justify-between flex-wrap gap-3">
