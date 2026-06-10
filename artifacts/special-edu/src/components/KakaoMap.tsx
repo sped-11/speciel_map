@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { School } from "@/data/schools";
-import { kindergartenCoords } from "@/data/kindergartenCoords";
+import { schoolCoords } from "@/data/schoolCoords";
 
 declare global {
   interface Window {
@@ -79,9 +79,9 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
   const geocodeSchool = useCallback(async (school: School): Promise<{ lat: number; lng: number } | null> => {
     if (coordCache[school.학교명] !== undefined) return coordCache[school.학교명];
 
-    // 유치원은 정확한 좌표 데이터 우선 사용
-    if (kindergartenCoords[school.학교명]) {
-      const coord = kindergartenCoords[school.학교명];
+    // 정확한 좌표 데이터 우선 사용 (유치원·초·중·고 모두)
+    if (schoolCoords[school.학교명]) {
+      const coord = schoolCoords[school.학교명];
       coordCache[school.학교명] = coord;
       return coord;
     }

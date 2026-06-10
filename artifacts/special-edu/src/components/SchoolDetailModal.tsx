@@ -70,6 +70,18 @@ export default function SchoolDetailModal({ school, onClose }: Props) {
                 <span className="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white">
                   {school.설치별}
                 </span>
+                {school.성별 && school.성별 !== "남녀공학" && (
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                    school.성별 === "남" ? "bg-sky-100 text-sky-700" : "bg-rose-100 text-rose-700"
+                  }`}>
+                    {school.성별 === "남" ? "남학교" : "여학교"}
+                  </span>
+                )}
+                {school.성별 === "남녀공학" && (
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-700">
+                    남녀공학
+                  </span>
+                )}
                 {school.에듀케어수 > 0 && (
                   <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-300 text-yellow-900 font-semibold">
                     에듀케어

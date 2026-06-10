@@ -260,6 +260,12 @@ export default function App() {
                         <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                           <span className={`text-xs px-1.5 py-0.5 rounded font-semibold ${lv.cls}`}>{lv.label}</span>
                           <span className="text-xs text-muted-foreground">{school.구}</span>
+                          {school.성별 === "남" && (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 font-semibold">남학교</span>
+                          )}
+                          {school.성별 === "녀" && (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 font-semibold">여학교</span>
+                          )}
                           {school.에듀케어수 > 0 && (
                             <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700 font-semibold">에듀케어</span>
                           )}
