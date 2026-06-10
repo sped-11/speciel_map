@@ -15,11 +15,15 @@ type FilterKey =
   | "고"
   | "특수학교"
   | "특수학급 설치교"
-  | "특수에듀케어 설치교";
+  | "특수에듀케어 설치교"
+  | "남학교"
+  | "여학교"
+  | "남녀공학";
 
 const DISTRICT_FILTERS: FilterKey[] = ["동작구", "관악구"];
 const GRADE_FILTERS: FilterKey[] = ["유", "초", "중", "고"];
 const CATEGORY_FILTERS: FilterKey[] = ["특수학교", "특수학급 설치교", "특수에듀케어 설치교"];
+const GENDER_FILTERS: FilterKey[] = ["남학교", "여학교", "남녀공학"];
 
 function gradeMatch(학교급: string, key: FilterKey) {
   return (
@@ -37,12 +41,20 @@ function categoryMatch(school: School, key: FilterKey) {
   return false;
 }
 
+function genderMatch(school: School, key: FilterKey) {
+  if (key === "남학교") return school.성별 === "남";
+  if (key === "여학교") return school.성별 === "녀";
+  if (key === "남녀공학") return school.성별 === "남녀공학";
+  return false;
+}
+
 function applyFilters(list: School[], activeFilters: Set<FilterKey>): School[] {
   if (activeFilters.size === 0) return list;
 
   const districtActive = DISTRICT_FILTERS.filter(f => activeFilters.has(f));
   const gradeActive = GRADE_FILTERS.filter(f => activeFilters.has(f));
   const catActive = CATEGORY_FILTERS.filter(f => activeFilters.has(f));
+  const genderActive = GENDER_FILTERS.filter(f => activeFilters.has(f));
 
   const 특수학교CatActive = catActive.includes("특수학교");
   const nonSpecialCatActive = catActive.filter(k => k !== "특수학교");
@@ -63,6 +75,9 @@ function applyFilters(list: School[], activeFilters: Set<FilterKey>): School[] {
 
     // Regular schools: category filter ("특수학교" cat is irrelevant for regular schools)
     if (nonSpecialCatActive.length > 0 && !nonSpecialCatActive.some(k => categoryMatch(school, k))) return false;
+
+    // Gender filter (only applies to schools that have 성별 set, i.e. middle/high)
+    if (genderActive.length > 0 && !genderActive.some(k => genderMatch(school, k))) return false;
 
     return true;
   });
@@ -195,6 +210,37 @@ export default function App() {
             <FilterButton label="특수학교" />
             <FilterButton label="특수학급 설치교" />
             <FilterButton label="특수에듀케어 설치교" />
+            <span className="text-border">|</span>
+            <button
+              onClick={() => toggleFilter("남학교")}
+              className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all border ${
+                isActive("남학교")
+                  ? "bg-sky-600 text-white border-sky-600 shadow-sm"
+                  : "bg-white text-sky-700 border-sky-200 hover:border-sky-500 hover:bg-sky-50"
+              }`}
+            >
+              남학교
+            </button>
+            <button
+              onClick={() => toggleFilter("여학교")}
+              className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all border ${
+                isActive("여학교")
+                  ? "bg-rose-500 text-white border-rose-500 shadow-sm"
+                  : "bg-white text-rose-600 border-rose-200 hover:border-rose-400 hover:bg-rose-50"
+              }`}
+            >
+              여학교
+            </button>
+            <button
+              onClick={() => toggleFilter("남녀공학")}
+              className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all border ${
+                isActive("남녀공학")
+                  ? "bg-teal-600 text-white border-teal-600 shadow-sm"
+                  : "bg-white text-teal-700 border-teal-200 hover:border-teal-500 hover:bg-teal-50"
+              }`}
+            >
+              남녀공학
+            </button>
             <div className="ml-auto flex items-center gap-2">
               {/* Search */}
               <input
