@@ -170,7 +170,7 @@ export default function App() {
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h1 className="text-xl font-bold tracking-tight">2026 특수교육대상자 배치 현황</h1>
-              <p className="text-sm text-white/70 mt-0.5">2026. 6. 1. 기준 · 동작구 · 관악구</p>
+              <p className="text-sm text-white/70 mt-0.5">2026. 7. 1. 기준 · 동작구 · 관악구</p>
             </div>
             {/* Stats */}
             <div className="flex items-center gap-5 text-sm">
