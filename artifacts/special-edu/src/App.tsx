@@ -1,5 +1,7 @@
-import { useState, useMemo, useRef } from "react";
-import { schools, School } from "@/data/schools";
+import { useState, useMemo, useRef, useEffect } from "react";
+import type { School } from "@/data/schools";
+import { loadAllData } from "@/data/googleSheets";
+import type { StudentData } from "@/data/students";
 import KakaoMap from "@/components/KakaoMap";
 import SchoolDetailModal from "@/components/SchoolDetailModal";
 
@@ -166,10 +168,24 @@ function getJanyeoBadge(잔여: number) {
 
 export default function App() {
   const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem(SESSION_KEY) === "1");
+  const [schools, setSchools] = useState<School[]>([]);
+  const [studentData, setStudentData] = useState<StudentData>({});
+  const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<Set<FilterKey>>(new Set());
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("map");
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    loadAllData()
+      .then(({ schools, studentData }) => {
+        setSchools(schools);
+        setStudentData(studentData);
+      })
+      .catch(err => setDataError(String(err?.message ?? err)))
+      .finally(() => setDataLoading(false));
+  }, []);
 
   const filteredSchools = useMemo(() => {
     let list = applyFilters(schools, activeFilters);
@@ -178,7 +194,7 @@ export default function App() {
       list = list.filter(s => s.학교명.includes(q) || s.약칭.includes(q));
     }
     return list;
-  }, [activeFilters, search]);
+  }, [schools, activeFilters, search]);
 
   function toggleFilter(key: FilterKey) {
     setActiveFilters(prev => {
@@ -217,6 +233,27 @@ export default function App() {
   );
 
   if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
+
+  if (dataLoading) return (
+    <div className="min-h-screen bg-[#1B4FA8] flex flex-col items-center justify-center gap-4">
+      <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
+      <p className="text-white font-medium text-sm">데이터를 불러오는 중입니다...</p>
+    </div>
+  );
+
+  if (dataError) return (
+    <div className="min-h-screen bg-[#1B4FA8] flex flex-col items-center justify-center gap-4 p-6">
+      <div className="text-4xl">⚠️</div>
+      <p className="text-white font-bold text-lg">데이터 불러오기 실패</p>
+      <p className="text-white/70 text-sm text-center max-w-sm">{dataError}</p>
+      <button
+        onClick={() => window.location.reload()}
+        className="mt-2 bg-white text-[#1B4FA8] font-semibold px-5 py-2 rounded-lg text-sm hover:bg-white/90 transition-colors"
+      >
+        다시 시도
+      </button>
+    </div>
+  );
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
@@ -498,6 +535,7 @@ export default function App() {
         <SchoolDetailModal
           school={selectedSchool}
           onClose={() => setSelectedSchool(null)}
+          studentData={studentData}
         />
       )}
     </div>

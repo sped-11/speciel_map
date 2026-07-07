@@ -1,9 +1,10 @@
 import { School } from "@/data/schools";
-import { studentData } from "@/data/students";
+import type { StudentData } from "@/data/students";
 
 interface Props {
   school: School;
   onClose: () => void;
+  studentData: StudentData;
 }
 
 function gradeOrder(grade: string): number {
@@ -29,7 +30,7 @@ function levelLabel(학교급: string): string {
   }[학교급] ?? 학교급;
 }
 
-export default function SchoolDetailModal({ school, onClose }: Props) {
+export default function SchoolDetailModal({ school, onClose, studentData }: Props) {
   const gradeMap = studentData[school.학교명] ?? {};
   const grades = Object.keys(gradeMap).sort((a, b) => gradeOrder(a) - gradeOrder(b));
   const totalSpecial = Object.values(gradeMap).reduce((s, v) => s + v.특수학급, 0);
