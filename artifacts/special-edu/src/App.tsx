@@ -171,8 +171,6 @@ export default function App() {
   const [viewMode, setViewMode] = useState<ViewMode>("map");
   const [search, setSearch] = useState("");
 
-  if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
-
   const filteredSchools = useMemo(() => {
     let list = applyFilters(schools, activeFilters);
     if (search.trim()) {
@@ -217,6 +215,8 @@ export default function App() {
       {label}
     </button>
   );
+
+  if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
