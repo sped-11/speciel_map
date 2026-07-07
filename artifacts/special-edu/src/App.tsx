@@ -1,7 +1,67 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { schools, School } from "@/data/schools";
 import KakaoMap from "@/components/KakaoMap";
 import SchoolDetailModal from "@/components/SchoolDetailModal";
+
+const PASSWORD = "dg2895";
+const SESSION_KEY = "special_edu_auth";
+
+function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
+  const [value, setValue] = useState("");
+  const [error, setError] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (value === PASSWORD) {
+      sessionStorage.setItem(SESSION_KEY, "1");
+      onUnlock();
+    } else {
+      setError(true);
+      setValue("");
+      setTimeout(() => {
+        setError(false);
+        inputRef.current?.focus();
+      }, 1200);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-[#1B4FA8] flex flex-col items-center justify-center p-6">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-4xl">🔒</div>
+          <h1 className="text-lg font-bold text-gray-800 text-center">2026 특수교육대상자 배치 현황</h1>
+          <p className="text-sm text-gray-500 text-center">동작구 · 관악구 (내부자료)</p>
+        </div>
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
+          <input
+            ref={inputRef}
+            type="password"
+            autoFocus
+            placeholder="암호를 입력하세요"
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            className={`w-full border rounded-lg px-4 py-3 text-sm outline-none transition-all
+              ${error
+                ? "border-red-400 bg-red-50 text-red-700 placeholder-red-400 shake"
+                : "border-gray-300 focus:border-[#1B4FA8] focus:ring-2 focus:ring-[#1B4FA8]/20"
+              }`}
+          />
+          {error && (
+            <p className="text-xs text-red-500 text-center -mt-1">암호가 올바르지 않습니다.</p>
+          )}
+          <button
+            type="submit"
+            className="w-full bg-[#1B4FA8] hover:bg-[#1640880] text-white font-semibold rounded-lg py-3 text-sm transition-colors"
+          >
+            확인
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_MAP_KEY ?? "";
 
@@ -105,10 +165,13 @@ function getJanyeoBadge(잔여: number) {
 }
 
 export default function App() {
+  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem(SESSION_KEY) === "1");
   const [activeFilters, setActiveFilters] = useState<Set<FilterKey>>(new Set());
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("map");
   const [search, setSearch] = useState("");
+
+  if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
 
   const filteredSchools = useMemo(() => {
     let list = applyFilters(schools, activeFilters);
