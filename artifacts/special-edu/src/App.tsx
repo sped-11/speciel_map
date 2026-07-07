@@ -79,13 +79,14 @@ type FilterKey =
   | "특수학교"
   | "특수학급 설치교"
   | "특수에듀케어 설치교"
+  | "과밀학급"
   | "남학교"
   | "여학교"
   | "남녀공학";
 
 const DISTRICT_FILTERS: FilterKey[] = ["동작구", "관악구"];
 const GRADE_FILTERS: FilterKey[] = ["유", "초", "중", "고"];
-const CATEGORY_FILTERS: FilterKey[] = ["특수학교", "특수학급 설치교", "특수에듀케어 설치교"];
+const CATEGORY_FILTERS: FilterKey[] = ["특수학교", "특수학급 설치교", "특수에듀케어 설치교", "과밀학급"];
 const GENDER_FILTERS: FilterKey[] = ["남학교", "여학교", "남녀공학"];
 
 function gradeMatch(학교급: string, key: FilterKey) {
@@ -101,6 +102,7 @@ function categoryMatch(school: School, key: FilterKey) {
   if (key === "특수학교") return school.학교급 === "특수학교";
   if (key === "특수학급 설치교") return school.특수학급수 > 0;
   if (key === "특수에듀케어 설치교") return school.학교급 === "유치원" && school.에듀케어수 > 0;
+  if (key === "과밀학급") return school.잔여 < 0;
   return false;
 }
 
@@ -129,8 +131,8 @@ function applyFilters(list: School[], activeFilters: Set<FilterKey>): School[] {
     if (districtActive.length > 0 && !districtActive.includes(school.구 as FilterKey)) return false;
 
     if (isSpecialSchool) {
-      // Special schools only appear when "특수학교" category is explicitly selected
-      return 특수학교CatActive;
+      // Special schools appear when "특수학교" is selected, or "과밀학급" is selected and they're overcrowded
+      return 특수학교CatActive || (activeFilters.has("과밀학급") && school.잔여 < 0);
     }
 
     // Regular schools: grade filter
@@ -358,23 +360,61 @@ export default function App() {
       </header>
 
       {/* Filter Bar */}
-      <div className="bg-white border-b border-border px-6 py-3 flex-shrink-0">
-        <div className="max-w-screen-2xl mx-auto">
-          <div className="flex flex-wrap items-center gap-2">
+      <div className="bg-white border-b border-border px-6 py-2 flex-shrink-0">
+        <div className="max-w-screen-2xl mx-auto flex flex-col gap-1.5">
+          {/* Row 1: 전체 | 구 | 학교급 | 특수에듀케어 + 검색/뷰 토글 */}
+          <div className="flex items-center gap-2 flex-wrap">
             <FilterButton label="전체" />
-            <span className="text-border">|</span>
+            <span className="text-border text-xs">|</span>
             <FilterButton label="동작구" />
             <FilterButton label="관악구" />
-            <span className="text-border">|</span>
+            <span className="text-border text-xs">|</span>
             <FilterButton label="유" />
             <FilterButton label="초" />
             <FilterButton label="중" />
             <FilterButton label="고" />
-            <span className="text-border">|</span>
             <FilterButton label="특수학교" />
-            <FilterButton label="특수학급 설치교" />
+            <span className="text-border text-xs">|</span>
             <FilterButton label="특수에듀케어 설치교" />
-            <span className="text-border">|</span>
+            <div className="ml-auto flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="학교 검색..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="text-sm border border-border rounded-full px-4 py-1.5 bg-background focus:outline-none focus:ring-2 focus:ring-[#1B4FA8]/30 w-40"
+              />
+              <div className="flex border border-border rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setViewMode("map")}
+                  className={`px-3 py-1.5 text-sm font-medium ${viewMode === "map" ? "bg-[#1B4FA8] text-white" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  지도
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`px-3 py-1.5 text-sm font-medium ${viewMode === "list" ? "bg-[#1B4FA8] text-white" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  목록
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* Row 2: 특수학급 설치교 | 과밀학급 | 남학교, 여학교, 남녀공학 */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <FilterButton label="특수학급 설치교" />
+            <span className="text-border text-xs">|</span>
+            <button
+              onClick={() => toggleFilter("과밀학급")}
+              className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all border ${
+                isActive("과밀학급")
+                  ? "bg-red-600 text-white border-red-600 shadow-sm"
+                  : "bg-white text-red-600 border-red-200 hover:border-red-500 hover:bg-red-50"
+              }`}
+            >
+              과밀학급
+            </button>
+            <span className="text-border text-xs">|</span>
             <button
               onClick={() => toggleFilter("남학교")}
               className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all border ${
@@ -405,31 +445,6 @@ export default function App() {
             >
               남녀공학
             </button>
-            <div className="ml-auto flex items-center gap-2">
-              {/* Search */}
-              <input
-                type="text"
-                placeholder="학교 검색..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="text-sm border border-border rounded-full px-4 py-1.5 bg-background focus:outline-none focus:ring-2 focus:ring-[#1B4FA8]/30 w-40"
-              />
-              {/* View toggle */}
-              <div className="flex border border-border rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setViewMode("map")}
-                  className={`px-3 py-1.5 text-sm font-medium ${viewMode === "map" ? "bg-[#1B4FA8] text-white" : "text-muted-foreground hover:bg-muted"}`}
-                >
-                  지도
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`px-3 py-1.5 text-sm font-medium ${viewMode === "list" ? "bg-[#1B4FA8] text-white" : "text-muted-foreground hover:bg-muted"}`}
-                >
-                  목록
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
