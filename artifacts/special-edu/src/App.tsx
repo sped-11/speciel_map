@@ -6,6 +6,7 @@ import KakaoMap from "@/components/KakaoMap";
 import SchoolDetailModal from "@/components/SchoolDetailModal";
 
 const PASSWORD = "dg2895";
+const ADMIN_PASSWORD = "1338";
 const SESSION_KEY = "special_edu_auth";
 
 function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
@@ -176,8 +177,15 @@ export default function App() {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("map");
   const [search, setSearch] = useState("");
+  const [showRefreshModal, setShowRefreshModal] = useState(false);
+  const [adminPw, setAdminPw] = useState("");
+  const [adminPwError, setAdminPwError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const adminInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  function fetchData() {
+    setDataLoading(true);
+    setDataError(null);
     loadAllData()
       .then(({ schools, studentData }) => {
         setSchools(schools);
@@ -185,7 +193,43 @@ export default function App() {
       })
       .catch(err => setDataError(String(err?.message ?? err)))
       .finally(() => setDataLoading(false));
+  }
+
+  useEffect(() => {
+    fetchData();
   }, []);
+
+  function handleAdminSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (adminPw === ADMIN_PASSWORD) {
+      setShowRefreshModal(false);
+      setAdminPw("");
+      setAdminPwError(false);
+      setRefreshing(true);
+      setDataError(null);
+      loadAllData()
+        .then(({ schools, studentData }) => {
+          setSchools(schools);
+          setStudentData(studentData);
+        })
+        .catch(err => setDataError(String(err?.message ?? err)))
+        .finally(() => setRefreshing(false));
+    } else {
+      setAdminPwError(true);
+      setAdminPw("");
+      setTimeout(() => {
+        setAdminPwError(false);
+        adminInputRef.current?.focus();
+      }, 1200);
+    }
+  }
+
+  function openRefreshModal() {
+    setAdminPw("");
+    setAdminPwError(false);
+    setShowRefreshModal(true);
+    setTimeout(() => adminInputRef.current?.focus(), 50);
+  }
 
   const filteredSchools = useMemo(() => {
     let list = applyFilters(schools, activeFilters);
@@ -272,22 +316,42 @@ export default function App() {
               <h1 className="text-xl font-bold tracking-tight">2026 특수교육대상자 배치 현황</h1>
               <p className="text-sm text-white/70 mt-0.5">2026. 7. 1. 기준 · 동작구 · 관악구</p>
             </div>
-            {/* Stats */}
-            <div className="flex items-center gap-5 text-sm">
-              <div className="text-center">
-                <div className="text-xl font-bold">{filteredSchools.length}</div>
-                <div className="text-white/60 text-xs">대상 학교</div>
+            <div className="flex items-center gap-4">
+              {/* Stats */}
+              <div className="flex items-center gap-5 text-sm">
+                <div className="text-center">
+                  <div className="text-xl font-bold">{filteredSchools.length}</div>
+                  <div className="text-white/60 text-xs">대상 학교</div>
+                </div>
+                <div className="w-px h-8 bg-white/20" />
+                <div className="text-center">
+                  <div className="text-xl font-bold">{totalSpecial + totalGeneral}</div>
+                  <div className="text-white/60 text-xs">전체 배치</div>
+                </div>
+                <div className="w-px h-8 bg-white/20" />
+                <div className="text-center">
+                  <div className="text-xl font-bold text-emerald-300">{schoolsWithSpace}</div>
+                  <div className="text-white/60 text-xs">잔여 있는 학교</div>
+                </div>
               </div>
-              <div className="w-px h-8 bg-white/20" />
-              <div className="text-center">
-                <div className="text-xl font-bold">{totalSpecial + totalGeneral}</div>
-                <div className="text-white/60 text-xs">전체 배치</div>
-              </div>
-              <div className="w-px h-8 bg-white/20" />
-              <div className="text-center">
-                <div className="text-xl font-bold text-emerald-300">{schoolsWithSpace}</div>
-                <div className="text-white/60 text-xs">잔여 있는 학교</div>
-              </div>
+              {/* 현행화 button */}
+              <button
+                onClick={openRefreshModal}
+                disabled={refreshing}
+                className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-2 rounded-lg border border-white/30 transition-colors"
+              >
+                {refreshing ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    현행화 중…
+                  </>
+                ) : (
+                  <>
+                    <span>🔄</span>
+                    현행화
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -537,6 +601,54 @@ export default function App() {
           onClose={() => setSelectedSchool(null)}
           studentData={studentData}
         />
+      )}
+
+      {/* 현행화 Admin Modal */}
+      {showRefreshModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={e => { if (e.target === e.currentTarget) { setShowRefreshModal(false); setAdminPw(""); setAdminPwError(false); } }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs p-8 flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-4xl">🔄</div>
+              <h2 className="text-lg font-bold text-gray-800 text-center">현행화</h2>
+              <p className="text-sm text-gray-500 text-center">구글 시트에서 최신 데이터를 다시 불러옵니다.<br />관리자 비밀번호를 입력하세요.</p>
+            </div>
+            <form onSubmit={handleAdminSubmit} className="w-full flex flex-col gap-3">
+              <input
+                ref={adminInputRef}
+                type="password"
+                placeholder="관리자 비밀번호"
+                value={adminPw}
+                onChange={e => setAdminPw(e.target.value)}
+                className={`w-full border rounded-lg px-4 py-3 text-sm outline-none transition-all
+                  ${adminPwError
+                    ? "border-red-400 bg-red-50 text-red-700 placeholder-red-400 shake"
+                    : "border-gray-300 focus:border-[#1B4FA8] focus:ring-2 focus:ring-[#1B4FA8]/20"
+                  }`}
+              />
+              {adminPwError && (
+                <p className="text-xs text-red-500 text-center -mt-1">비밀번호가 올바르지 않습니다.</p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowRefreshModal(false); setAdminPw(""); setAdminPwError(false); }}
+                  className="flex-1 border border-gray-300 text-gray-600 font-semibold rounded-lg py-3 text-sm hover:bg-gray-50 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#1B4FA8] hover:bg-[#1640880] text-white font-semibold rounded-lg py-3 text-sm transition-colors"
+                >
+                  확인
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
