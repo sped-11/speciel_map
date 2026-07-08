@@ -25,6 +25,8 @@ jobs:
       - name: 웹사이트 변환(Build)하기
         run: pnpm run build
         working-directory: ./artifacts/special-edu
+        env:
+          VITE_KAKAO_MAP_KEY: ${{ secrets.VITE_KAKAO_MAP_KEY }}
 
       - name: 변환된 파일 업로드 준비
         uses: actions/upload-pages-artifact@v3
