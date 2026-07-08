@@ -1,0 +1,44 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ["main"] # main 브랜치에 코드가 올라올 때마다 실행됩니다.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 코드 가져오기
+        uses: actions/checkout@v4
+      
+      - name: Node.js 설치
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 라이브러리 설치하기
+        run: npm install
+        working-directory: ./artifacts/special-edu # 이 폴더 안에서 작업하라는 뜻입니다.
+
+      - name: 웹사이트 변환(Build)하기
+        run: npm run build
+        working-directory: ./artifacts/special-edu
+
+      - name: 변환된 파일 업로드 준비
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./artifacts/special-edu/dist # 변환된 결과물이 담기는 폴더입니다.
+
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 깃허브 페이지로 배포하기
+        id: deployment
+        uses: actions/deploy-pages@v4
