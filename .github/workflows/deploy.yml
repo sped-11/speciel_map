@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # main 브랜치에 코드가 올라올 때마다 실행됩니다.
+    branches: ["main"]
 
 jobs:
   build:
@@ -14,20 +14,22 @@ jobs:
       - name: Node.js 설치
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+
+      - name: pnpm 도구 설치하기
+        run: npm install -g pnpm
 
       - name: 라이브러리 설치하기
-        run: npm install
-        working-directory: ./artifacts/special-edu # 이 폴더 안에서 작업하라는 뜻입니다.
+        run: pnpm install
 
       - name: 웹사이트 변환(Build)하기
-        run: npm run build
+        run: pnpm run build
         working-directory: ./artifacts/special-edu
 
       - name: 변환된 파일 업로드 준비
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./artifacts/special-edu/dist # 변환된 결과물이 담기는 폴더입니다.
+          path: ./artifacts/special-edu/dist
 
   deploy:
     needs: build
