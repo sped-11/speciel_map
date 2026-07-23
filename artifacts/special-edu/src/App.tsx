@@ -302,7 +302,7 @@ export default function App() {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden">
+    <div className="flex flex-col min-h-[100dvh] bg-background overflow-hidden">
       {/* Header */}
       <div className="bg-red-600 text-white text-center text-xs font-bold py-1.5 tracking-widest flex items-center justify-center gap-4 flex-shrink-0">
         <span>🔒 외부유출 금지</span>
@@ -311,28 +311,28 @@ export default function App() {
         <span className="w-px h-3 bg-white/40" />
         <span>🔒 외부유출 금지</span>
       </div>
-      <header className="bg-[#1B4FA8] text-white px-6 py-4 shadow-lg flex-shrink-0">
+      <header className="bg-[#1B4FA8] text-white px-4 py-3 sm:px-6 sm:py-4 shadow-lg flex-shrink-0">
         <div className="max-w-screen-2xl mx-auto">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">2026 특수교육대상자 배치 현황</h1>
+          <div className="flex items-start justify-between flex-wrap gap-3">
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight">2026 특수교육대상자 배치 현황</h1>
               <p className="text-sm text-white/70 mt-0.5">2026. 7. 1. 기준 · 동작구 · 관악구</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-3 w-full sm:w-auto">
               {/* Stats */}
-              <div className="flex items-center gap-5 text-sm">
-                <div className="text-center">
-                  <div className="text-xl font-bold">{filteredSchools.length}</div>
+              <div className="flex items-center gap-3 sm:gap-5 text-sm">
+                <div className="text-center min-w-12">
+                  <div className="text-lg sm:text-xl font-bold">{filteredSchools.length}</div>
                   <div className="text-white/60 text-xs">대상 학교</div>
                 </div>
                 <div className="w-px h-8 bg-white/20" />
-                <div className="text-center">
-                  <div className="text-xl font-bold">{totalSpecial + totalGeneral}</div>
+                <div className="text-center min-w-12">
+                  <div className="text-lg sm:text-xl font-bold">{totalSpecial + totalGeneral}</div>
                   <div className="text-white/60 text-xs">전체 배치</div>
                 </div>
                 <div className="w-px h-8 bg-white/20" />
-                <div className="text-center">
-                  <div className="text-xl font-bold text-emerald-300">{schoolsWithSpace}</div>
+                <div className="text-center min-w-12">
+                  <div className="text-lg sm:text-xl font-bold text-emerald-300">{schoolsWithSpace}</div>
                   <div className="text-white/60 text-xs">잔여 있는 학교</div>
                 </div>
               </div>
@@ -360,7 +360,7 @@ export default function App() {
       </header>
 
       {/* Filter Bar */}
-      <div className="bg-white border-b border-border px-6 py-2 flex-shrink-0">
+      <div className="bg-white border-b border-border px-3 py-2 sm:px-6 flex-shrink-0">
         <div className="max-w-screen-2xl mx-auto flex flex-col gap-1.5">
           {/* Row 1: 전체 | 구 | 학교급 | 특수에듀케어 + 검색/뷰 토글 */}
           <div className="flex items-center gap-2 flex-wrap">
@@ -376,24 +376,24 @@ export default function App() {
             <FilterButton label="특수학교" />
             <span className="text-border text-xs">|</span>
             <FilterButton label="특수에듀케어 설치교" />
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-0 sm:ml-auto flex items-center gap-2 w-full sm:w-auto">
               <input
                 type="text"
                 placeholder="학교 검색..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="text-sm border border-border rounded-full px-4 py-1.5 bg-background focus:outline-none focus:ring-2 focus:ring-[#1B4FA8]/30 w-40"
+                className="text-sm border border-border rounded-full px-4 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-[#1B4FA8]/30 flex-1 sm:flex-none sm:w-40"
               />
               <div className="flex border border-border rounded-lg overflow-hidden">
                 <button
                   onClick={() => setViewMode("map")}
-                  className={`px-3 py-1.5 text-sm font-medium ${viewMode === "map" ? "bg-[#1B4FA8] text-white" : "text-muted-foreground hover:bg-muted"}`}
+                  className={`px-3 py-2 text-sm font-medium min-h-10 ${viewMode === "map" ? "bg-[#1B4FA8] text-white" : "text-muted-foreground hover:bg-muted"}`}
                 >
                   지도
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`px-3 py-1.5 text-sm font-medium ${viewMode === "list" ? "bg-[#1B4FA8] text-white" : "text-muted-foreground hover:bg-muted"}`}
+                  className={`px-3 py-2 text-sm font-medium min-h-10 ${viewMode === "list" ? "bg-[#1B4FA8] text-white" : "text-muted-foreground hover:bg-muted"}`}
                 >
                   목록
                 </button>
@@ -450,11 +450,11 @@ export default function App() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden max-w-screen-2xl mx-auto w-full p-4 flex gap-4">
+      <div className="flex-1 min-h-0 overflow-y-auto md:overflow-hidden max-w-screen-2xl mx-auto w-full p-3 sm:p-4 flex flex-col md:flex-row gap-3 sm:gap-4">
         {viewMode === "map" ? (
           <>
             {/* Map */}
-            <div className="flex-1 min-h-0">
+            <div className="w-full h-[48vh] min-h-[320px] max-h-[560px] md:flex-1 md:h-auto md:min-h-0 md:max-h-none shrink-0">
               <KakaoMap
                 schools={filteredSchools}
                 onSelectSchool={setSelectedSchool}
@@ -464,7 +464,7 @@ export default function App() {
             </div>
 
             {/* Side panel - school list */}
-            <div className="w-80 flex-shrink-0 flex flex-col gap-2 overflow-y-auto">
+            <div className="w-full md:w-80 md:flex-shrink-0 flex flex-col gap-2 overflow-y-auto max-h-[42vh] md:max-h-none">
               <div className="text-xs text-muted-foreground px-1 mb-1">
                 {filteredSchools.length}개 학교 · 특수배치 {totalSpecial}명 · 일반배치 {totalGeneral}명
               </div>
@@ -526,12 +526,12 @@ export default function App() {
           </>
         ) : (
           /* List View */
-          <div className="flex-1 min-h-0 overflow-auto">
+          <div className="flex-1 min-h-0 min-w-0 overflow-auto">
             <div className="mb-3 text-sm text-muted-foreground">
               {filteredSchools.length}개 학교 · 특수배치 {totalSpecial}명 · 일반학급 배치 {totalGeneral}명 · 정원 {totalCapacity}명
             </div>
             <div className="bg-white rounded-xl border border-border overflow-hidden">
-              <table className="w-full text-sm">
+              <table className="w-full table-fixed text-sm">
                 <thead>
                   <tr className="bg-[#1B4FA8] text-white">
                     <th className="text-left px-4 py-3 font-semibold">구</th>

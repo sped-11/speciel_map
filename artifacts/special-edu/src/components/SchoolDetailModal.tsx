@@ -54,7 +54,7 @@ export default function SchoolDetailModal({ school, onClose, studentData }: Prop
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
-        className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden"
+        className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}

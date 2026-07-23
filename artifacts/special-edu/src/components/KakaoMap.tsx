@@ -75,6 +75,25 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
     document.head.appendChild(script);
   }, [apiKey, initMap]);
 
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    const mapElement = mapRef.current;
+    if (!map || !mapElement) return;
+
+    const relayout = () => map.relayout();
+    const resizeObserver = new ResizeObserver(relayout);
+    resizeObserver.observe(mapElement);
+    window.addEventListener("orientationchange", relayout);
+    map.setDraggable(true);
+    map.setZoomable(true);
+    relayout();
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("orientationchange", relayout);
+    };
+  }, [loading]);
+
   const geocodeSchool = useCallback(async (school: School): Promise<{ lat: number; lng: number } | null> => {
     if (coordCache[school.학교명] !== undefined) return coordCache[school.학교명];
 
@@ -269,7 +288,7 @@ export default function KakaoMap({ schools, onSelectSchool, selectedSchool, apiK
           학교 위치 검색 중... ({geocodeCount}개 완료)
         </div>
       )}
-      <div ref={mapRef} className="w-full h-full" />
+      <div id="kakao-map" ref={mapRef} className="w-full h-full" />
       {/* Legend */}
       {!loading && (
         <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur rounded-lg px-3 py-2 shadow-md text-xs space-y-1">
